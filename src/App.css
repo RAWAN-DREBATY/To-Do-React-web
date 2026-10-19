@@ -1,0 +1,16 @@
+.icon-button {
+  transition: all 0.2s !important;
+}
+
+.icon-button:hover {
+  background-color: #c5c5c5 !important;
+  box-shadow: 0px 7px 7px rgba(0, 0, 0, 0.4) !important;
+}
+.todo-card {
+  transition: all 0.2s !important;
+}
+.todo-card:hover {
+  padding-top: 20px;
+  padding-bottom: 20px;
+  box-shadow: 0px 7px 7px rgba(0, 0, 0, 0.4) !important;
+}
