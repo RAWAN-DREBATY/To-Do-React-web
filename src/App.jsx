@@ -5,6 +5,9 @@ import { v4 as uuidv4 } from "uuid";
 import { useState } from "react";
 import { ThemeProvider } from "@emotion/react";
 import { createTheme } from "@mui/material/styles";
+
+import { ToastProvider } from "./contexts/ToastContext";
+
 const theme = createTheme({
   typography: {
     fontFamily: ["Alexandria"],
@@ -37,21 +40,24 @@ const todos = [
 ];
 function App() {
   const [ToDoS, setToDoS] = useState([todos]);
+
   return (
     <ThemeProvider theme={theme}>
-      <div
-        className="App"
-        style={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          height: "100vh",
-        }}
-      >
-        <todosContext.Provider value={{ ToDoS, setToDoS }}>
-          <ToDoList />
-        </todosContext.Provider>
-      </div>
+      <ToastProvider>
+        <div
+          className="App"
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            height: "100vh",
+          }}
+        >
+          <todosContext.Provider value={{ ToDoS, setToDoS }}>
+            <ToDoList />
+          </todosContext.Provider>
+        </div>
+      </ToastProvider>
     </ThemeProvider>
   );
 }
