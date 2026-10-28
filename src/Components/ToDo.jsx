@@ -15,8 +15,10 @@ import DeleteOutlinedIcon from "@mui/icons-material/DeleteOutlined";
 // import DialogTitle from "@mui/material/DialogTitle";
 // import Button from "@mui/material/Button";
 // import TextField from "@mui/material/TextField";
-
+import { todosContext } from "../contexts/todosContext";
+import { useContext } from "react";
 const ToDo = ({ td, showDelete, showUpdate, onComplete }) => {
+  const { todos, dispatch } = useContext(todosContext);
   function handleDeleteClick() {
     showDelete(td);
   }

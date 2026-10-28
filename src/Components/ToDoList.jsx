@@ -11,17 +11,16 @@ import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
 import { useState, useContext, useEffect, useMemo } from "react";
 import { todosContext } from "../contexts/todosContext";
-import { v4 as uuidv4 } from "uuid";
 import Dialog from "@mui/material/Dialog";
 import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
 import { ToastContext } from "../contexts/ToastContext";
-// import Button from "@mui/material/Button";
-// import TextField from "@mui/material/TextField";
+
 export default function SimpleContainer() {
-  const { ToDoS, setToDoS } = useContext(todosContext);
+  // تغيير الاسم هنا من ToDoS إلى todos ليتطابق مع الـ Context
+  const { todos = [], dispatch } = useContext(todosContext);
   const { showHideToast } = useContext(ToastContext);
   const [title, setTitle] = useState("");
   const [displaytodo, setdisplaytodo] = useState("All");
@@ -29,27 +28,21 @@ export default function SimpleContainer() {
   const [dailogToDo, setDailogToDo] = useState(null);
   const [dtd, setdtd] = useState(null);
   const [showUpdateAlert, setshowUpdateAlert] = useState(false);
-  const [updatetodo, setupdatetodo] = useState({
-    title: "",
-    details: "",
-  });
+  const [updatetodo, setupdatetodo] = useState({ title: "", details: "" });
 
-  useEffect(() => {
-    const storagetodo = localStorage.getItem("todos");
-    if (storagetodo) {
-      setToDoS(JSON.parse(storagetodo));
-    }
-  }, []);
+  // useEffect(() => {
+  //   dispatch({ type: "get" });
+  // }, [dispatch]);
 
   const completedtodos = useMemo(() => {
-    return ToDoS.filter((t) => t.isCompleted);
-  }, [ToDoS]);
+    return todos.filter((t) => t.isCompleted);
+  }, [todos]);
+
   const uncompletedtodos = useMemo(() => {
-    return ToDoS.filter((t) => !t.isCompleted);
-  }, [ToDoS]);
+    return todos.filter((t) => !t.isCompleted);
+  }, [todos]);
 
-  let todosRender = ToDoS;
-
+  let todosRender = todos;
   if (displaytodo === "Completed") {
     todosRender = completedtodos;
   } else if (displaytodo === "UnCompleted") {
@@ -71,70 +64,57 @@ export default function SimpleContainer() {
       setdisplaytodo(e.target.value);
     }
   }
+
   function handleClose() {
     setshowDeleteAlert(false);
   }
 
   function handleDeleteConfirm() {
-    const filteredTodos = ToDoS.filter((t) => t.id !== dailogToDo.id);
-    setToDoS(filteredTodos);
-    localStorage.setItem("todos", JSON.stringify(filteredTodos));
+    dispatch({ type: "delete", payload: { id: dailogToDo.id } });
     setshowDeleteAlert(false);
     showHideToast("deleted successfully");
   }
+
   function showDeleteDialog(todo) {
     setDailogToDo(todo);
     setshowDeleteAlert(true);
   }
+
   function showUpdateDialog(tod) {
     setdtd(tod);
-    setupdatetodo({ title: tod.title, details: tod.details });
+    setupdatetodo({ id: tod.id, title: tod.title, details: tod.details });
     setshowUpdateAlert(true);
   }
+
   function handleAddToDo() {
-    if (!title.trim()) return;
-
-    const newToDo = {
-      id: uuidv4(),
-      title: title,
-      details: "",
-      isCompleted: false,
-    };
-
-    const ut = [...ToDoS, newToDo];
-    setToDoS(ut);
-    localStorage.setItem("todos", JSON.stringify(ut));
+    dispatch({ type: "added", payload: { newTitle: title } });
     setTitle("");
     showHideToast("you added successfully a new todo");
   }
-  //update functions
+
   function handleUpdateClose() {
     setshowUpdateAlert(false);
   }
 
   function handleUpdateConfirm() {
-    const updatedList = ToDoS.map((t) => {
-      if (t.id === dtd.id) {
-        return { ...t, title: updatetodo.title, details: updatetodo.details };
-      }
-      return t;
+    dispatch({
+      type: "update",
+      payload: {
+        id: updatetodo.id,
+        title: updatetodo.title,
+        details: updatetodo.details,
+      },
     });
-    setToDoS(updatedList);
-    localStorage.setItem("todos", JSON.stringify(updatedList));
     setshowUpdateAlert(false);
     showHideToast("edited successfully");
   }
-  function handleComplete(todoo) {
-    const updatedToDos = ToDoS.map((todo) => {
-      if (todo.id === todoo.id) {
-        return { ...todo, isCompleted: !todo.isCompleted };
-      }
-      return todo;
-    });
-    setToDoS(updatedToDos);
-    localStorage.setItem("todos", JSON.stringify(updatedToDos));
+
+  // تعديل الدالة لتستخدم الـ dispatch بدلاً من setToDoS
+  function handleComplete(todo) {
+    dispatch({ type: "toggleComplete", payload: { id: todo.id } });
     showHideToast("successfully edited");
   }
+
   return (
     <>
       <Dialog open={showDeleteAlert} onClose={handleClose}>
@@ -149,6 +129,7 @@ export default function SimpleContainer() {
           </Button>
         </DialogActions>
       </Dialog>
+
       <Dialog open={showUpdateAlert} onClose={handleUpdateClose}>
         <DialogTitle>{"Edit Your task :"}</DialogTitle>
         <DialogContent>
@@ -181,18 +162,15 @@ export default function SimpleContainer() {
           <Button onClick={handleUpdateConfirm}>Edit</Button>
         </DialogActions>
       </Dialog>
+
       <Container maxWidth="sm">
         <Card
           sx={{ minWidth: 275 }}
-          style={{
-            maxHeight: "80vh",
-            overflow: "scroll",
-          }}
+          style={{ maxHeight: "80vh", overflow: "scroll" }}
         >
           <CardContent>
             <Typography variant="h2">My ToDo List</Typography>
             <Divider />
-
             <ToggleButtonGroup
               exclusive
               aria-label="text alignment"
@@ -209,7 +187,7 @@ export default function SimpleContainer() {
             {todoElements}
 
             <Grid container style={{ marginTop: "20px" }} spacing={2}>
-              <Grid xs={8}>
+              <Grid item xs={8}>
                 <TextField
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
@@ -219,12 +197,12 @@ export default function SimpleContainer() {
                   style={{ width: "100%" }}
                 />
               </Grid>
-              <Grid xs={4}>
+              <Grid item xs={4}>
                 <Button
                   onClick={handleAddToDo}
                   style={{ height: "100%", width: "100%" }}
                   variant="contained"
-                  disabled={title.length == 0}
+                  disabled={title.length === 0}
                 >
                   Add
                 </Button>

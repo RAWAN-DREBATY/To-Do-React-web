@@ -7,7 +7,7 @@ import { ThemeProvider } from "@emotion/react";
 import { createTheme } from "@mui/material/styles";
 
 import { ToastProvider } from "./contexts/ToastContext";
-
+import TodosProvider from "./contexts/todosContext";
 const theme = createTheme({
   typography: {
     fontFamily: ["Alexandria"],
@@ -43,21 +43,23 @@ function App() {
 
   return (
     <ThemeProvider theme={theme}>
-      <ToastProvider>
-        <div
-          className="App"
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            height: "100vh",
-          }}
-        >
-          <todosContext.Provider value={{ ToDoS, setToDoS }}>
+      <TodosProvider>
+        <ToastProvider>
+          <div
+            className="App"
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              height: "100vh",
+            }}
+          >
+            {/* <todosContext.Provider value={{ ToDoS, setToDoS }}> */}
             <ToDoList />
-          </todosContext.Provider>
-        </div>
-      </ToastProvider>
+            {/* </todosContext.Provider> */}
+          </div>
+        </ToastProvider>
+      </TodosProvider>
     </ThemeProvider>
   );
 }
